@@ -60,20 +60,28 @@ class CheatSheet():
         content = soup.find("div", id="content").find_all(
             "div", recursive=False)
 
-        for e in content[50:51]:
+        for e in content:
             info = e.contents[1]
             search_string = e.div["id"].lower()
-            example = info.find("div", class_="example").extract()
+            example = None
+            if info.find("div", class_="example"):
+                example = info.find("div", class_="example").extract()
 
             regex = re.compile(r"(?:\n)([a-z_A-Z]+\(.*\))")
+            params = info.find("params")
             methods = regex.findall(info.text)
+            github_url = info.a
             res = {
                 "label": e.div.text,
-                "github_url": info.a["href"],
-                "example": example.text,
-                "params": info.find("params").text,
                 "methods": methods,
             }
+            if github_url:
+                res["github_url"] = github_url["href"]
+            if params:
+                res["params"] = params.text
+            if example:
+                res["example"] = example.text
+
             self.__set_key(search_string, res)
 
     def __set_key(self, key: str, value: dict) -> None:
