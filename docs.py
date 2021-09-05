@@ -1,11 +1,15 @@
 import datetime
+import os
 import re
 import requests
 from bs4 import BeautifulSoup
+from dotenv import load_dotenv
 
+load_dotenv()
 CHEAT_SHEET_URL = "https://www.ursinaengine.org/cheat_sheet_dark.html"
 # Time before cached version will be updated (in seconds)
 MAX_DATA_AGE = 1800
+DEBUG = True if os.getenv("LOG_LEVEL") == "debug" else False
 
 
 class CheatSheet():
@@ -35,21 +39,22 @@ class CheatSheet():
         return sorted(self.docs.keys())
 
     def __fetch_from_url(self, url: str) -> bool:
-        print(f"GET: {CHEAT_SHEET_URL}")
+        debug_print(f"GET: {CHEAT_SHEET_URL}")
         response = requests.get(url)
         if response.ok:
-            print("response OK")
+            debug_print("response OK")
             self.last_update = datetime.datetime.now()
             self.__html = response.text
             return True
         else:
-            print("Error while fetching HTML: Invalid response from",
+            print("Error: Invalid response from",
                   CHEAT_SHEET_URL,
                   "Using local version if available.")
             return False
 
     def check_data_expired(self) -> bool:
         time_delta = (datetime.datetime.now() - self.last_update).seconds
+        debug_print(f"DEBUG: last data update {time_delta} seconds ago")
         if time_delta > MAX_DATA_AGE:
             return True
         else:
@@ -86,6 +91,11 @@ class CheatSheet():
 
     def __set_key(self, key: str, value: dict) -> None:
         self.docs[key] = value
+
+
+def debug_print(text: str) -> None:
+    if DEBUG:
+        print(text)
 
 
 if __name__ == "__main__":
