@@ -1,3 +1,4 @@
+import json
 import re
 from bs4 import BeautifulSoup
 # import requests
@@ -20,12 +21,12 @@ if __name__ == "__main__":
         regex = re.compile(r'(?:\n)([a-z_A-Z]+\(.*\))')
         methods = regex.findall(info.text)
         res = {
-            'title': e.div.text,
-            'github_url': info.a['href'],
-            'example': example.text,
-            'params': info.find('params').text,
-            'methods': methods,
+            "title": e.div.text,
+            "github_url": info.a['href'],
+            "example": example.text,
+            "params": info.find('params').text,
+            "methods": methods,
         }
         docs[search_string] = res
 
-    print(docs['animation']['methods'])
+    print(json.dumps(docs))
